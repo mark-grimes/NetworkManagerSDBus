@@ -1,0 +1,4 @@
+#include "libnm/version.h"
+
+const char* libnm::version::GitDescribe="${LibNM_GIT_DESCRIBE}";
+const char libnm::version::GitHash[41]="${LibNM_GIT_HASH}";
