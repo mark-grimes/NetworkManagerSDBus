@@ -23,6 +23,9 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in" "${PROJECT_BINA
 
 
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+if( NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR )
+	set( ${PROJECT_NAME}_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include" PARENT_SCOPE )
+endif()
 aux_source_directory( "${CMAKE_CURRENT_SOURCE_DIR}/src" library_sources )
 list( REMOVE_ITEM library_sources "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" ) # main.cpp belongs only in the executable
 
@@ -33,8 +36,10 @@ pkg_check_modules( SDBus REQUIRED libsystemd )
 target_link_libraries( ${PROJECT_NAME}_LIB ${SDBus_LIBRARIES} )
 target_include_directories( ${PROJECT_NAME}_LIB PUBLIC ${SDBus_INCLUDE_DIRS} )
 
-add_executable( ${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" )
-target_link_libraries( ${PROJECT_NAME} ${PROJECT_NAME}_LIB )
+if( NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR )
+	add_executable( ${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" )
+	target_link_libraries( ${PROJECT_NAME} ${PROJECT_NAME}_LIB )
+endif()
 ## Uncomment this if you get "undefined reference to `pthread_create'" when using std::thread
 #if( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
 #	target_link_libraries( ${PROJECT_NAME}_LIB "pthread" )
