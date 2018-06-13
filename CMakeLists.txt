@@ -11,7 +11,7 @@ project( LibNM )
 cmake_minimum_required(VERSION 2.8)
 
 if( NOT MSVC ) # Microsoft Visual Studio is C++11 by default and doesn't recognise this flag
-	add_definitions( "-std=c++11" )
+	add_definitions( "-std=c++17" )
 endif()
 
 
