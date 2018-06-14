@@ -23,6 +23,7 @@ namespace libnm
 		SDBus& operator=( SDBus&& other );
 		~SDBus();
 		operator sd_bus*();
+		int fileDescriptor() const;
 	protected:
 		sd_bus* pBus_;
 	};

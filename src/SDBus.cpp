@@ -46,3 +46,8 @@ libnm::SDBus::operator sd_bus*()
 {
 	return pBus_;
 }
+
+int libnm::SDBus::fileDescriptor() const
+{
+	return sd_bus_get_fd( pBus_ );
+}
