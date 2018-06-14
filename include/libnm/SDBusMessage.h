@@ -16,14 +16,15 @@ namespace libnm
 	{
 	public:
 		SDBusMessage();
-		SDBusMessage( const SDBusMessage& other ) = delete;
-		SDBusMessage( SDBusMessage&& other ) = delete;
-		SDBusMessage& operator=( const SDBusMessage& other ) = delete;
-		SDBusMessage& operator=( SDBusMessage&& other ) = delete;
+		SDBusMessage( sd_bus_message* pMessage );
+		SDBusMessage( const SDBusMessage& other );
+		SDBusMessage( SDBusMessage&& other );
+		SDBusMessage& operator=( const SDBusMessage& other );
+		SDBusMessage& operator=( SDBusMessage&& other );
 		~SDBusMessage();
 		operator sd_bus_message**();
-		template<typename T>
-		void read( T& result );
+		template<typename... Ts>
+		void read( Ts&... results );
 	protected:
 		sd_bus_message* pMessage_;
 	};
@@ -34,10 +35,10 @@ namespace libnm
 #include <systemd/sd-bus.h>
 #include "libnm/TypeSignature.h"
 
-template<typename T>
-void libnm::SDBusMessage::read( T& returnValue )
+template<typename... Ts>
+void libnm::SDBusMessage::read( Ts&... returnValues )
 {
-	int result=sd_bus_message_read( pMessage_, TypeSignature<T>::Type, &returnValue );
+	int result=sd_bus_message_read( pMessage_, TypeSignature<Ts...>::Type, &returnValues... );
 	if( result<0 )
 	{
 		throw std::runtime_error("Failed to parse response message: "+std::string(strerror(-result)));
@@ -46,5 +47,6 @@ void libnm::SDBusMessage::read( T& returnValue )
 namespace libnm
 {
 	template<> void SDBusMessage::read<std::string>( std::string& returnValue );
+	template<> void SDBusMessage::read<std::string,std::string>( std::string& returnValue1, std::string& returnValue2 );
 	template<> void SDBusMessage::read<bool>( bool& returnValue );
 }
