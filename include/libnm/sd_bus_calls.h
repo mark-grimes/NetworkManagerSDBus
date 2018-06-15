@@ -1,6 +1,5 @@
 #pragma once
-#include <functional>
-#include <systemd/sd-bus.h>
+#include "libnm/detail/async_detail.h"
 //
 // Forward declarations
 //
@@ -23,6 +22,7 @@ namespace libnm
 
 
 
+#include <systemd/sd-bus.h>
 #include "libnm/SDBusMessage.h"
 
 template<typename return_type>
