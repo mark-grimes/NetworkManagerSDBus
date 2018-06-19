@@ -2,12 +2,14 @@
 #include <string>
 #include <functional>
 #include <system_error>
+#include "libnm/detail/async_detail.h"
 //
 // Forward declarations
 //
 namespace libnm
 {
 	class SDBus;
+	class SDBusMessage;
 }
 
 
@@ -30,10 +32,16 @@ namespace libnm
 
 		const char* service() const;
 		const char* path() const;
+
 		template<typename return_type>
 		void getParameter( libnm::SDBus& bus, const char* interface, const char* property, return_type& value ) const;
 		template<typename return_type>
 		void getParameterAsync( libnm::SDBus& bus, const char* interface, const char* property, std::function<void(return_type&&,std::error_code)> callback ) const;
+
+		template<typename... arg_types>
+		libnm::SDBusMessage callMethod( libnm::SDBus& bus, const char* interface, const char* method, arg_types&&... args );
+		template<typename... arg_types>
+		void callMethodAsync( libnm::SDBus& bus, const char* interface, const char* method, libnm::detail::CallbackData::callback_type callback, arg_types&&... args );
 	protected:
 		std::string service_;
 		std::string path_;
@@ -83,6 +91,18 @@ void libnm::SDBusObject::getParameterAsync( libnm::SDBus& bus, const char* inter
 				std::cerr << "Error in SDBusObject::getParameterAsync, user callback threw exception: " << exception.what() << std::endl;
 			}
 		}, interface, property );
+}
+
+template<typename... arg_types>
+libnm::SDBusMessage libnm::SDBusObject::callMethod( libnm::SDBus& bus, const char* interface, const char* method, arg_types&&... args )
+{
+	return libnm::callMethod( bus, service_.c_str(), path_.c_str(), interface, method, std::forward<arg_types>(args)... );
+}
+
+template<typename... arg_types>
+void libnm::SDBusObject::callMethodAsync( libnm::SDBus& bus, const char* interface, const char* method, libnm::detail::CallbackData::callback_type callback, arg_types&&... args )
+{
+	return libnm::callMethodAsync( bus, service_.c_str(), path_.c_str(), interface, method, std::move(callback), std::forward<arg_types>(args)... );
 }
 
 // Also specialise TypeSignature so that other code knows what to do with the class
