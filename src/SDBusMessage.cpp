@@ -25,6 +25,7 @@ libnm::SDBusMessage::SDBusMessage( SDBusMessage&& other )
 
 libnm::SDBusMessage& libnm::SDBusMessage::operator=( const SDBusMessage& other )
 {
+	sd_bus_message_unref( pMessage_ );
 	pMessage_=other.pMessage_;
 	sd_bus_message_ref( pMessage_ );
 	return *this;
@@ -32,6 +33,7 @@ libnm::SDBusMessage& libnm::SDBusMessage::operator=( const SDBusMessage& other )
 
 libnm::SDBusMessage& libnm::SDBusMessage::operator=( SDBusMessage&& other )
 {
+	sd_bus_message_unref( pMessage_ );
 	pMessage_=other.pMessage_;
 	other.pMessage_=nullptr;
 	return *this;
