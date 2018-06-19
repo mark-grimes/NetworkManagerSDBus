@@ -68,6 +68,7 @@ struct libnm::detail::ReadHelper<std::vector<value_type,Ts...>>
 {
 	static void read( sd_bus_message* pMessage, std::vector<value_type,Ts...>& returnValue )
 	{
+		const char* sender=sd_bus_message_get_sender(pMessage);
 		int result=sd_bus_message_enter_container( pMessage, 'a', TypeSignature<value_type>::Type );
 		if( result<0 ) throw std::runtime_error("Failed to enter container: "+std::string(strerror(-result)));
 
@@ -76,7 +77,7 @@ struct libnm::detail::ReadHelper<std::vector<value_type,Ts...>>
 		{
 			result=sd_bus_message_read( pMessage, TypeSignature<value_type>::Type, &proxy );
 			if( result<0 ) throw std::runtime_error("Failed to read array: "+std::string(strerror(-result)));
-			else if( result>0 ) returnValue.emplace_back(proxy);
+			else if( result>0 ) returnValue.emplace_back( sender, proxy );
 		}
 		result=sd_bus_message_exit_container( pMessage );
 		if( result<0 ) throw std::runtime_error("Failed to exit container: "+std::string(strerror(-result)));

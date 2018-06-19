@@ -1,5 +1,13 @@
 #pragma once
 #include <string>
+//
+// Forward declarations
+//
+namespace libnm
+{
+	class SDBus;
+}
+
 
 namespace libnm
 {
@@ -11,19 +19,30 @@ namespace libnm
 	class SDBusObject
 	{
 	public:
-		SDBusObject( const char* path );
+		SDBusObject( const char* service, const char* path );
 		SDBusObject( const SDBusObject& other ) = default;
 		SDBusObject( SDBusObject&& other ) = default;
 		SDBusObject& operator=( const SDBusObject& other ) = default;
 		SDBusObject& operator=( SDBusObject&& other ) = default;
 		~SDBusObject();
 
+		const char* service() const;
 		const char* path() const;
+		template<typename return_type>
+		void getParameter( libnm::SDBus& bus, const char* interface, const char* property, return_type& value ) const;
 	protected:
+		std::string service_;
 		std::string path_;
 	};
 
 } // end of namespace libnm
+
+#include "libnm/sd_bus_calls.h"
+template<typename return_type>
+void libnm::SDBusObject::getParameter( libnm::SDBus& bus, const char* interface, const char* property, return_type& value ) const
+{
+	return libnm::getParameter( bus, service_.c_str(), path_.c_str(), interface, property, value );
+}
 
 // Also specialise TypeSignature so that other code knows what to do with the class
 #include "libnm/TypeSignature.h"

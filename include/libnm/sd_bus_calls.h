@@ -24,6 +24,7 @@ namespace libnm
 
 #include <systemd/sd-bus.h>
 #include "libnm/SDBusMessage.h"
+#include "libnm/SDBusError.h"
 
 template<typename return_type>
 void libnm::getParameter( libnm::SDBus& bus, const char* service, const char* object, const char* interface, const char* property, return_type& value )
