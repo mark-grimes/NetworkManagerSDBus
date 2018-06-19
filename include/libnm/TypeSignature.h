@@ -38,6 +38,12 @@ namespace libnm
 		static constexpr char const* Type=&detail::ConvertToString<sequence>::string[0];
 	};
 
+	template<> struct TypeSignature<const char*&>
+	{
+		using sequence=std::integer_sequence<char,'s'>;
+		static constexpr char const* Type=&detail::ConvertToString<sequence>::string[0];
+	};
+
 	template<> struct TypeSignature<bool>
 	{
 		using sequence=std::integer_sequence<char,'b'>;
