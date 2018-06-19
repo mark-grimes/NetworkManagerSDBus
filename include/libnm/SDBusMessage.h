@@ -1,5 +1,6 @@
 #pragma once
 
+#include <system_error>
 //
 // Forward declarations
 //
@@ -25,6 +26,8 @@ namespace libnm
 		operator sd_bus_message**();
 		template<typename... Ts>
 		void read( Ts&... results );
+		template<typename... Ts>
+		void readNoThrow( std::error_code& error, Ts&... results );
 	protected:
 		sd_bus_message* pMessage_;
 	};
@@ -45,20 +48,29 @@ namespace libnm::detail
 template<typename... Ts>
 void libnm::SDBusMessage::read( Ts&... returnValues )
 {
+	std::error_code error;
+	readNoThrow( error, returnValues... );
+	if( error ) throw std::system_error(error,"libnm::SDBusMessage::read()");
+}
+
+template<typename... Ts>
+void libnm::SDBusMessage::readNoThrow( std::error_code& error, Ts&... returnValues )
+{
 	// Delegate to the ReadHelper struct because that can be partially specialised, whereas
 	// functions can't.
-	libnm::detail::ReadHelper<Ts...>::read( pMessage_, returnValues... );
+	libnm::detail::ReadHelper<Ts...>::read( pMessage_, returnValues..., error );
 }
 
 template<typename... Ts>
 struct libnm::detail::ReadHelper
 {
-	static void read( sd_bus_message* pMessage, Ts&... returnValues )
+	static void read( sd_bus_message* pMessage, Ts&... returnValues, std::error_code& error )
 	{
 		int result=sd_bus_message_read( pMessage, libnm::TypeSignature<Ts...>::Type, &returnValues... );
 		if( result<0 )
 		{
-			throw std::runtime_error("Failed to parse response message: "+std::string(strerror(-result)));
+			error=std::error_code( -result, std::generic_category() );
+			return;
 		}
 	}
 };
@@ -66,27 +78,37 @@ struct libnm::detail::ReadHelper
 template<typename value_type,typename... Ts>
 struct libnm::detail::ReadHelper<std::vector<value_type,Ts...>>
 {
-	static void read( sd_bus_message* pMessage, std::vector<value_type,Ts...>& returnValue )
+	static void read( sd_bus_message* pMessage, std::vector<value_type,Ts...>& returnValue, std::error_code& error )
 	{
 		const char* sender=sd_bus_message_get_sender(pMessage);
 		int result=sd_bus_message_enter_container( pMessage, 'a', TypeSignature<value_type>::Type );
-		if( result<0 ) throw std::runtime_error("Failed to enter container: "+std::string(strerror(-result)));
+		if( result<0 )
+		{
+			error=std::error_code( -result, std::generic_category() );
+			return;
+		}
 
 		typename TypeSignature<value_type>::proxy_type proxy;
 		while( result>0 )
 		{
 			result=sd_bus_message_read( pMessage, TypeSignature<value_type>::Type, &proxy );
-			if( result<0 ) throw std::runtime_error("Failed to read array: "+std::string(strerror(-result)));
+			if( result<0 )
+			{
+				error=std::error_code( -result, std::generic_category() );
+				return;
+			}
 			else if( result>0 ) returnValue.emplace_back( sender, proxy );
 		}
 		result=sd_bus_message_exit_container( pMessage );
-		if( result<0 ) throw std::runtime_error("Failed to exit container: "+std::string(strerror(-result)));
+		if( result<0 )
+		{
+			error=std::error_code( -result, std::generic_category() );
+			return;
+		}
 	}
 };
 
-namespace libnm
-{
-	template<> void SDBusMessage::read<std::string>( std::string& returnValue );
-	template<> void SDBusMessage::read<std::string,std::string>( std::string& returnValue1, std::string& returnValue2 );
-	template<> void SDBusMessage::read<bool>( bool& returnValue );
-}
+// Specialisations for particular types
+template<> struct libnm::detail::ReadHelper<std::string>{ static void read( sd_bus_message* pMessage, std::string& returnValue, std::error_code& error ); };
+template<> struct libnm::detail::ReadHelper<std::string,std::string>{ static void read( sd_bus_message* pMessage, std::string& returnValue1, std::string& returnValue2, std::error_code& error ); };
+template<> struct libnm::detail::ReadHelper<bool>{ static void read( sd_bus_message* pMessage, bool& returnValue, std::error_code& error ); };

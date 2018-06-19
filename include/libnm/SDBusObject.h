@@ -67,7 +67,7 @@ void libnm::SDBusObject::getParameterAsync( libnm::SDBus& bus, const char* inter
 				sd_bus_message* pMessage=*message;
 				int result=sd_bus_message_enter_container(pMessage, 'v', libnm::TypeSignature<return_type>::Type );
 				if( result<0 ) error=std::make_error_code(std::errc::invalid_argument);
-				else message.read(value);
+				else message.readNoThrow(error,value);
 			}
 			catch( const std::exception& exception )
 			{

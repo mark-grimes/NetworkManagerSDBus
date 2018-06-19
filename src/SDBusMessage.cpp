@@ -49,40 +49,40 @@ libnm::SDBusMessage::operator sd_bus_message**()
 	return &pMessage_;
 }
 
-template<>
-void libnm::SDBusMessage::read<std::string>( std::string& returnValue )
+void libnm::detail::ReadHelper<std::string>::read( sd_bus_message* pMessage, std::string& returnValue, std::error_code& error )
 {
 	char* pRawString;
-	int result=sd_bus_message_read( pMessage_, TypeSignature<std::string>::Type, &pRawString );
+	int result=sd_bus_message_read( pMessage, TypeSignature<std::string>::Type, &pRawString );
 	if( result<0 )
 	{
-		throw std::runtime_error("Failed to parse response message: "+std::string(strerror(-result)));
+		error=std::error_code( -result, std::generic_category() );
+		return;
 	}
 	returnValue=std::string(pRawString);
 }
 
-template<>
-void libnm::SDBusMessage::read<std::string,std::string>( std::string& returnValue1, std::string& returnValue2 )
+void libnm::detail::ReadHelper<std::string,std::string>::read( sd_bus_message* pMessage, std::string& returnValue1, std::string& returnValue2, std::error_code& error )
 {
 	char* pRawString1;
 	char* pRawString2;
-	int result=sd_bus_message_read( pMessage_, TypeSignature<std::string,std::string>::Type, &pRawString1, &pRawString2 );
+	int result=sd_bus_message_read( pMessage, TypeSignature<std::string,std::string>::Type, &pRawString1, &pRawString2 );
 	if( result<0 )
 	{
-		throw std::runtime_error("Failed to parse response message: "+std::string(strerror(-result)));
+		error=std::error_code( -result, std::generic_category() );
+		return;
 	}
 	returnValue1=std::string(pRawString1);
 	returnValue2=std::string(pRawString2);
 }
 
-template<>
-void libnm::SDBusMessage::read<bool>( bool& returnValue )
+void libnm::detail::ReadHelper<bool>::read( sd_bus_message* pMessage, bool& returnValue, std::error_code& error )
 {
 	int32_t fourBytes;
-	int result=sd_bus_message_read( pMessage_, TypeSignature<bool>::Type, &fourBytes );
+	int result=sd_bus_message_read( pMessage, TypeSignature<bool>::Type, &fourBytes );
 	if( result<0 )
 	{
-		throw std::runtime_error("Failed to parse response message: "+std::string(strerror(-result)));
+		error=std::error_code( -result, std::generic_category() );
+		return;
 	}
 	returnValue=fourBytes;
 }
