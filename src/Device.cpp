@@ -7,6 +7,12 @@ libnm::Device::Device( const char* path )
 	// No operation besides the initialiser list
 }
 
+libnm::Device::Device( const char* service, const char* path )
+	: libnm::SDBusObject(service,path)
+{
+	// No operation besides the initialiser list
+}
+
 libnm::Device::~Device()
 {
 	// No operation

@@ -4,6 +4,7 @@
 #include "libnm/SDBusObject.h"
 #include "libnm/SDBusMessage.h"
 #include "libnm/SDBus.h"
+#include "libnm/Device.h"
 
 std::ostream& operator<<( std::ostream& stream, const libnm::NetworkManager::ConnectivityState& state )
 {
@@ -59,5 +60,15 @@ void libnm::NetworkManager::Enable( libnm::SDBus& bus, bool enable, std::functio
 	this->callMethodAsync( bus, "org.freedesktop.NetworkManager", "Enable",
 		[userCallback=std::move(callback)]( libnm::SDBusMessage reply ){
 			userCallback();
+		} );
+}
+
+void libnm::NetworkManager::GetAllDevices( libnm::SDBus& bus, std::function<void(std::vector<libnm::Device>&&)> callback )
+{
+	this->callMethodAsync( bus, "org.freedesktop.NetworkManager", "GetAllDevices",
+		[userCallback=std::move(callback)]( libnm::SDBusMessage reply ){
+			std::vector<libnm::Device> devices;
+			reply.read(devices);
+			userCallback( std::move(devices) );
 		} );
 }

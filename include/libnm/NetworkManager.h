@@ -8,6 +8,7 @@
 namespace libnm
 {
 	class SDBus;
+	class Device;
 }
 
 namespace libnm
@@ -24,6 +25,7 @@ namespace libnm
 		virtual ~NetworkManager();
 		void CheckConnectivity( libnm::SDBus& bus, std::function<void(ConnectivityState)> callback ) const;
 		void Enable( libnm::SDBus& bus, bool enable, std::function<void()> callback );
+		void GetAllDevices( libnm::SDBus& bus, std::function<void(std::vector<libnm::Device>&&)> callback );
 	protected:
 	};
 } // end of namespace libnm
