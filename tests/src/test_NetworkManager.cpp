@@ -20,7 +20,11 @@ SCENARIO( "Test that NetworkManager works as expected", "[NetworkManager]" )
 					callbackReturned=true;
 				}
 			) );
-			while( !callbackReturned ) sd_bus_process( bus, nullptr );
+			while( !callbackReturned ) sd_bus_process( bus, nullptr ); // Run the event loop until the callback occurs
+			// I have no way of knowing what the network state on the test device is. I'll
+			// just assume it has full connectivity for now. At least the error message will
+			// give an indication if the call fails or just that the network is in a different
+			// state.
 			CHECK( state==libnm::NetworkManager::ConnectivityState::FULL );
 		}
 	}

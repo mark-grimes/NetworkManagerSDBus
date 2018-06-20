@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include "libnm/SDBusObject.h"
 //
 // Forward declarations
 //
@@ -11,10 +12,16 @@ namespace libnm
 
 namespace libnm
 {
-	class NetworkManager
+	class NetworkManager : public libnm::SDBusObject
 	{
 	public:
 		enum class ConnectivityState { UNKNOWN=0, NONE=1, PORTAL=2, LIMITED=3, FULL=4 };
+		NetworkManager();
+		NetworkManager( const NetworkManager& other ) = default;
+		NetworkManager( NetworkManager&& other ) = default;
+		NetworkManager& operator=( const NetworkManager& other ) = default;
+		NetworkManager& operator=( NetworkManager&& other ) = default;
+		virtual ~NetworkManager();
 		void CheckConnectivity( libnm::SDBus& bus, std::function<void(ConnectivityState)> callback ) const;
 		void Enable( libnm::SDBus& bus, bool enable, std::function<void()> callback );
 	protected:

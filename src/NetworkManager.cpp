@@ -19,13 +19,21 @@ std::ostream& operator<<( std::ostream& stream, const libnm::NetworkManager::Con
 	return stream;
 }
 
-// Since the SDBusObject doesn't ever change state it's safe to use a single instance for everything.
-// That way I can limit the includes in the header file.
-libnm::SDBusObject globalNetworkManager( "org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager" );
+libnm::NetworkManager::NetworkManager()
+	: libnm::SDBusObject("org.freedesktop.NetworkManager","/org/freedesktop/NetworkManager")
+{
+	// No operation besides the initialiser list
+}
+
+libnm::NetworkManager::~NetworkManager()
+{
+	// No operation
+}
 
 void libnm::NetworkManager::CheckConnectivity( libnm::SDBus& bus, std::function<void(ConnectivityState)> callback ) const
 {
-	globalNetworkManager.callMethodAsync( bus, "org.freedesktop.NetworkManager", "CheckConnectivity",
+	// Manually cast to non-const this because I know this method doesn't (shouldn't) change the state
+	const_cast<libnm::NetworkManager*>(this)->callMethodAsync( bus, "org.freedesktop.NetworkManager", "CheckConnectivity",
 		[userCallback=std::move(callback)]( libnm::SDBusMessage reply ){
 			uint32_t state;
 			reply.read( state );
@@ -48,7 +56,7 @@ void libnm::NetworkManager::CheckConnectivity( libnm::SDBus& bus, std::function<
 
 void libnm::NetworkManager::Enable( libnm::SDBus& bus, bool enable, std::function<void()> callback )
 {
-	globalNetworkManager.callMethodAsync( bus, "org.freedesktop.NetworkManager", "Enable",
+	this->callMethodAsync( bus, "org.freedesktop.NetworkManager", "Enable",
 		[userCallback=std::move(callback)]( libnm::SDBusMessage reply ){
 			userCallback();
 		} );

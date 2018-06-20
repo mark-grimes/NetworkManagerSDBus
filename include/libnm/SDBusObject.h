@@ -28,7 +28,7 @@ namespace libnm
 		SDBusObject( SDBusObject&& other ) = default;
 		SDBusObject& operator=( const SDBusObject& other ) = default;
 		SDBusObject& operator=( SDBusObject&& other ) = default;
-		~SDBusObject();
+		virtual ~SDBusObject();
 
 		const char* service() const;
 		const char* path() const;
