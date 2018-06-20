@@ -2,15 +2,19 @@
 #include <string>
 #include "catch.hpp"
 
-bool isHexChar( char character )
+// Use the unnamed namespace for things only used in this file
+namespace
 {
-	return (character == '0') || (character == '1') || (character == '2') || (character == '3') || (character == '4')
-	    || (character == '5') || (character == '6') || (character == '7') || (character == '8') || (character == '9')
-	    || (character == 'a') || (character == 'b') || (character == 'c') || (character == 'd') || (character == 'e') || (character == 'f')
-	    || (character == 'A') || (character == 'B') || (character == 'C') || (character == 'D') || (character == 'E') || (character == 'F');
-}
+	bool isHexChar( char character )
+	{
+		return (character == '0') || (character == '1') || (character == '2') || (character == '3') || (character == '4')
+		    || (character == '5') || (character == '6') || (character == '7') || (character == '8') || (character == '9')
+		    || (character == 'a') || (character == 'b') || (character == 'c') || (character == 'd') || (character == 'e') || (character == 'f')
+		    || (character == 'A') || (character == 'B') || (character == 'C') || (character == 'D') || (character == 'E') || (character == 'F');
+	}
+} // end of the unnamed namespace
 
-SCENARIO( "Test that version gives the correct git information", "[version]" )
+SCENARIO( "Test that libnm::version gives the correct git information", "[version]" )
 {
 	WHEN( "Test there are none zero values for the git hash and git describe" )
 	{
