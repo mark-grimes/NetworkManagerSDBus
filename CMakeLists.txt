@@ -29,6 +29,13 @@ endif()
 aux_source_directory( "${CMAKE_CURRENT_SOURCE_DIR}/src" library_sources )
 list( REMOVE_ITEM library_sources "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp" ) # main.cpp belongs only in the executable
 
+option( BUILD_WITH_ASIO "Build the ASIO event loop" ON )
+message( STATUS "BUILD_WITH_ASIO: ${BUILD_WITH_ASIO}" )
+if( BUILD_WITH_ASIO )
+	add_definitions( "-DLIBNM_ASIO_AVAILABLE" )
+	aux_source_directory( "${CMAKE_CURRENT_SOURCE_DIR}/src/asio" library_sources )
+endif()
+
 add_library( ${PROJECT_NAME}_LIB STATIC ${library_sources} "${PROJECT_BINARY_DIR}/src/version.cpp" )
 # Find the sd-bus library
 find_package( PkgConfig REQUIRED )
